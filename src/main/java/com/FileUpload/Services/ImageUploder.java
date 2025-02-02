@@ -7,5 +7,5 @@ import java.util.List;
 public interface ImageUploder {
     String uploadImageFile(MultipartFile image);
     List<String>AllFiles();
-    String preSignedUrl();
+    String preSignedUrl(String FileName);
 }

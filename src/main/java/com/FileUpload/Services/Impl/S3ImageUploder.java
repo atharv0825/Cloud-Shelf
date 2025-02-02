@@ -1,8 +1,8 @@
 package com.FileUpload.Services.Impl;
 
-import com.FileUpload.Exception.ImageUploderException;
 import com.FileUpload.Services.ImageUploder;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class S3ImageUploder implements ImageUploder {
@@ -72,7 +72,11 @@ public class S3ImageUploder implements ImageUploder {
     }
 
     @Override
-    public String preSignedUrl() {
-        return "";
+    public String preSignedUrl(String FileName) {
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucketName,FileName)
+                .withMethod(com.amazonaws.HttpMethod.GET)
+                .withExpiration(new java.util.Date(System.currentTimeMillis()+3600*1000));
+        URL url = client.generatePresignedUrl(generatePresignedUrlRequest);
+        return url.toString();
     }
 }
