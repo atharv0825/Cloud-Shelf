@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,18 @@ public class S3ImageUploder implements ImageUploder {
     @Value("${app.s3.bucket}")
     private String bucketName;
 
+    private static final String ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    public String generateRandomID(){
+        StringBuilder stringBuilder = new StringBuilder(5);
+        for(int i =0;i<5;i++){
+            int index = RANDOM.nextInt(ALPHANUMERIC.length());
+            stringBuilder.append(ALPHANUMERIC.charAt(index));
+        }
+        return stringBuilder.toString();
+    }
+
     @Override
     public String uploadImageFile(MultipartFile image) {
         if (image == null || image.isEmpty()) {
@@ -32,12 +45,15 @@ public class S3ImageUploder implements ImageUploder {
 
         //abc.png
         String actualFileName = image.getOriginalFilename();
+
         if(actualFileName == null || !actualFileName.contains(".")){
             throw new IllegalArgumentException("Invalid File Name");
         }
 
-        //adtefas.png
-        String newFileName = UUID.randomUUID().toString() + actualFileName.substring(actualFileName.lastIndexOf("."));
+        //create 6 digit Random Id
+        String randomId =generateRandomID();
+        //A00001.png
+        String newFileName = randomId + actualFileName.substring(actualFileName.lastIndexOf("."));
         //create Metadata of the file
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(image.getSize());
